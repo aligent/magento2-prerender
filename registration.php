@@ -9,6 +9,6 @@ use Magento\Framework\Component\ComponentRegistrar;
 
 ComponentRegistrar::register(
     ComponentRegistrar::MODULE,
-    'Aligent_PrerenderIo',
+    'Aligent_Prerender',
     __DIR__
 );

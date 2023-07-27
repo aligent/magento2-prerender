@@ -4,7 +4,7 @@
  */
 
 declare(strict_types=1);
-namespace Aligent\PrerenderIo\Model\Url;
+namespace Aligent\Prerender\Model\Url;
 
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;

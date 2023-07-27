@@ -4,10 +4,11 @@
  */
 
 declare(strict_types=1);
-namespace Aligent\PrerenderIo\Model\Api;
 
-use Aligent\PrerenderIo\Api\PrerenderClientInterface;
-use Aligent\PrerenderIo\Helper\Config;
+namespace Aligent\Prerender\Model\Api;
+
+use Aligent\Prerender\Api\PrerenderClientInterface;
+use Aligent\Prerender\Helper\Config;
 use Magento\Framework\HTTP\ClientInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Psr\Log\LoggerInterface;
@@ -16,7 +17,6 @@ class PrerenderClient implements PrerenderClientInterface
 {
 
     private const MAX_URLS = 1000;
-    private const PRERENDER_RECACHE_URL = 'https://api.prerender.io/recache';
 
     /** @var Config  */
     private Config $prerenderConfigHelper;
@@ -48,7 +48,7 @@ class PrerenderClient implements PrerenderClientInterface
     }
 
     /**
-     * Call Prerender.io API to recache list of URLs
+     * Call Prerender service API to recache list of URLs
      *
      * @param array $urls
      * @param int $storeId
@@ -67,19 +67,29 @@ class PrerenderClient implements PrerenderClientInterface
 
         $batches = array_chunk($urls, self::MAX_URLS);
         foreach ($batches as $batch) {
-            $this->sendRequest($batch, $token);
+            $this->sendRequest($batch, $token, $storeId);
         }
     }
 
     /**
-     * Sends a JSON POST request to Prerender.io
+     * Sends a JSON POST request to Prerender service
      *
      * @param array $urls
      * @param string $token
+     * @param int|null $storeId
      * @return void
      */
-    private function sendRequest(array $urls, string $token): void
+    private function sendRequest(array $urls, string $token, ?int $storeId = null): void
     {
+        $prerenderServiceUrl = $this->prerenderConfigHelper->getPrerenderServiceUrl($storeId);
+
+        if (empty($prerenderServiceUrl)) {
+            $this->logger->error(
+                __('ERROR: prerender url not found. Store ID: %1', $storeId)
+            );
+            return;
+        }
+
         $payload = $this->jsonSerializer->serialize(
             [
                 'prerenderToken' => $token,
@@ -87,10 +97,10 @@ class PrerenderClient implements PrerenderClientInterface
             ]
         );
         try {
-            $this->client->post(self::PRERENDER_RECACHE_URL, $payload);
+            $this->client->post($prerenderServiceUrl, $payload);
         } catch (\Exception $e) {
             $this->logger->error(
-                __('Error sending payload %1 to prerender.io', $payload),
+                __('Error sending payload %1 to Prerender service. Store ID: %2', $payload, $storeId),
                 ['exception' => $e]
             );
         }

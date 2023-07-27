@@ -4,7 +4,7 @@
  */
 
 declare(strict_types=1);
-namespace Aligent\PrerenderIo\Api;
+namespace Aligent\Prerender\Api;
 
 interface PrerenderClientInterface
 {
