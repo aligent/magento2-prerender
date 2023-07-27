@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-namespace Aligent\PrerenderIo\Model\Indexer\DataProvider;
+namespace Aligent\Prerender\Model\Indexer\DataProvider;
 
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
