@@ -5,11 +5,11 @@
 
 declare(strict_types=1);
 
-namespace Aligent\PrerenderIo\Model\Indexer\Category;
+namespace Aligent\Prerender\Model\Indexer\Category;
 
-use Aligent\PrerenderIo\Api\PrerenderClientInterface;
-use Aligent\PrerenderIo\Helper\Config;
-use Aligent\PrerenderIo\Model\Url\GetUrlsForCategories;
+use Aligent\Prerender\Api\PrerenderClientInterface;
+use Aligent\Prerender\Helper\Config;
+use Aligent\Prerender\Model\Url\GetUrlsForCategories;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
@@ -22,7 +22,7 @@ use Magento\Store\Model\StoreDimensionProvider;
 
 class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, DimensionalIndexerInterface
 {
-    private const INDEXER_ID = 'prerender_io_category';
+    private const INDEXER_ID = 'prerender_category';
     private const DEPLOYMENT_CONFIG_INDEXER_BATCHES = 'indexer/batch_size/';
 
     /** @var DimensionProviderInterface  */
