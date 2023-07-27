@@ -34,4 +34,4 @@ jobs:
       - name: Update Packagist
         env:
           API_TOKEN: ${{ secrets.PackagistApiToken }}
-        run: curl -XPOST -H'content-type:application/json' 'https://packagist.org/api/update-package?username=aligent&apiToken='$API_TOKEN -d'{"repository":{"url":"https://packagist.org/packages/aligent/magento2-prerender-io"}}'
+        run: curl -XPOST -H'content-type:application/json' 'https://packagist.org/api/update-package?username=aligent&apiToken='$API_TOKEN -d'{"repository":{"url":"https://packagist.org/packages/aligent/magento2-prerender"}}'
