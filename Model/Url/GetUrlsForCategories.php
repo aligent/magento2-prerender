@@ -9,18 +9,23 @@ namespace Aligent\Prerender\Model\Url;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Url;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
 class GetUrlsForCategories
 {
+    private const DELIMETER = "?";
+
     /** @var CollectionFactory  */
     private CollectionFactory $categoryCollectionFactory;
     /** @var StoreManagerInterface */
     private StoreManagerInterface $storeManager;
     /** @var Emulation */
     private Emulation $emulation;
+
+    private Url $url;
 
     /**
      *
@@ -31,11 +36,13 @@ class GetUrlsForCategories
     public function __construct(
         CollectionFactory $categoryCollectionFactory,
         StoreManagerInterface $storeManager,
-        Emulation $emulation
+        Emulation $emulation,
+        Url $url
     ) {
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->storeManager = $storeManager;
         $this->emulation = $emulation;
+        $this->url = $url;
     }
 
     /**
@@ -71,8 +78,10 @@ class GetUrlsForCategories
                 continue;
             }
             try {
-                // remove trailing slashes from urls
-                $urls[] = rtrim($store->getUrl($urlPath), '/');
+                $url = $this->url->getUrl($urlPath, ['_scope_to_url' => true]);
+
+                // remove trailing slashes and parameters from the url
+                $urls[] = substr($url, 0, strrpos($url, '/'));
             } catch (NoSuchEntityException $e) {
                 continue;
             }
