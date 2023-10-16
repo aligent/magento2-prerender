@@ -25,6 +25,7 @@ class GetUrlsForProducts
     /** @var Emulation */
     private Emulation $emulation;
 
+    /** @var Url */
     private Url $url;
 
     /**
