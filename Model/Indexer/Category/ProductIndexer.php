@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Aligent\Prerender\Model\Indexer\Category;
 
-use Aligent\Prerender\Api\Data\PrerenderRecachingManagementRequestInterfaceFactory as PrerenderRecachingManagementRequest;
+use Aligent\Prerender\Api\Data\PrerenderRecachingManagementRequestInterfaceFactory
+    as PrerenderRecachingManagementRequest;
 use Aligent\Prerender\Api\PrerenderClientInterface;
 use Aligent\Prerender\Helper\Config;
 use Aligent\Prerender\Model\Indexer\DataProvider\ProductCategories;
@@ -123,7 +124,9 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     public function executeByDimensions(array $dimensions, \Traversable $entityIds): void
     {
         if (count($dimensions) > 1 || !isset($dimensions[StoreDimensionProvider::DIMENSION_NAME])) {
-            throw new \InvalidArgumentException('Indexer "' . self::INDEXER_ID . '" supports only Store dimension');
+            throw new \InvalidArgumentException(
+                'Indexer "' . self::INDEXER_ID . '" supports only Store dimension'
+            );
         }
         $storeId = (int)$dimensions[StoreDimensionProvider::DIMENSION_NAME]->getValue();
 

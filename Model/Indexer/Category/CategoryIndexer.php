@@ -122,7 +122,9 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
     public function executeByDimensions(array $dimensions, \Traversable $entityIds): void
     {
         if (count($dimensions) > 1 || !isset($dimensions[StoreDimensionProvider::DIMENSION_NAME])) {
-            throw new \InvalidArgumentException('Indexer "' . self::INDEXER_ID . '" supports only Store dimension');
+            throw new \InvalidArgumentException(
+                'Indexer "' . self::INDEXER_ID . '" supports only Store dimension'
+            );
         }
         $storeId = (int)$dimensions[StoreDimensionProvider::DIMENSION_NAME]->getValue();
 
