@@ -10,6 +10,10 @@ namespace Aligent\Prerender\Model\Indexer\Category;
 use Aligent\Prerender\Api\PrerenderClientInterface;
 use Aligent\Prerender\Helper\Config;
 use Aligent\Prerender\Model\Url\GetUrlsForCategories;
+use Aligent\Prerender\Api\Data\PrerenderRecachingManagementRequestInterfaceFactory
+    as PrerenderRecachingManagementRequest;
+use Magento\AsynchronousOperations\Model\MassSchedule;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
@@ -25,42 +29,31 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
     private const INDEXER_ID = 'prerender_category';
     private const DEPLOYMENT_CONFIG_INDEXER_BATCHES = 'indexer/batch_size/';
 
-    /** @var DimensionProviderInterface  */
-    private DimensionProviderInterface $dimensionProvider;
-    /** @var GetUrlsForCategories  */
-    private GetUrlsForCategories $getUrlsForCategories;
-    /** @var PrerenderClientInterface  */
-    private PrerenderClientInterface $prerenderClient;
-    /** @var DeploymentConfig  */
-    private DeploymentConfig $eploymentConfig;
-    /** @var Config  */
-    private Config $prerenderConfigHelper;
     /** @var int|null  */
     private ?int $batchSize;
 
     /**
-     *
      * @param DimensionProviderInterface $dimensionProvider
      * @param GetUrlsForCategories $getUrlsForCategories
      * @param PrerenderClientInterface $prerenderClient
      * @param DeploymentConfig $deploymentConfig
      * @param Config $prerenderConfigHelper
+     * @param PrerenderRecachingManagementRequest $prerenderRecachingManagementRequest
+     * @param MassSchedule $massSchedule
      * @param int|null $batchSize
      */
     public function __construct(
-        DimensionProviderInterface $dimensionProvider,
-        GetUrlsForCategories $getUrlsForCategories,
-        PrerenderClientInterface $prerenderClient,
-        DeploymentConfig $deploymentConfig,
-        Config $prerenderConfigHelper,
+        private readonly DimensionProviderInterface $dimensionProvider,
+        private readonly GetUrlsForCategories $getUrlsForCategories,
+        private readonly PrerenderClientInterface $prerenderClient,
+        private readonly DeploymentConfig $deploymentConfig,
+        private readonly Config $prerenderConfigHelper,
+        private readonly PrerenderRecachingManagementRequest $prerenderRecachingManagementRequest,
+        private readonly MassSchedule $massSchedule,
+        private readonly Json $json,
         ?int $batchSize = 1000
     ) {
-        $this->dimensionProvider = $dimensionProvider;
-        $this->getUrlsForCategories = $getUrlsForCategories;
-        $this->prerenderClient = $prerenderClient;
-        $this->deploymentConfig = $deploymentConfig;
         $this->batchSize = $batchSize;
-        $this->prerenderConfigHelper = $prerenderConfigHelper;
     }
 
     /**
@@ -147,7 +140,11 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
 
         $urlBatches = array_chunk($urls, $this->batchSize);
         foreach ($urlBatches as $batchUrls) {
-            $this->prerenderClient->recacheUrls($batchUrls, $storeId);
+            $request = $this->prerenderRecachingManagementRequest->create();
+            $request->setBatchUrls($this->json->serialize($batchUrls));
+            $request->setStoreId((int) $storeId);
+            $request->setIndexerId(self::INDEXER_ID);
+            $this->massSchedule->publishMass('asynchronous.prerender.recaching', [[$request]]);
         }
     }
 }
