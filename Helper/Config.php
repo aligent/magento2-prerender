@@ -16,16 +16,13 @@ class Config
     private const XML_PATH_PRERENDER_TOKEN = 'system/prerender/token';
     private const XML_PATH_RECACHE_SERVICE_URL = 'system/prerender/service_url';
 
-    /** @var ScopeConfigInterface  */
-    private ScopeConfigInterface $scopeConfig;
-
     /**
      *
      * @param ScopeConfigInterface $scopeConfig
      */
-    public function __construct(ScopeConfigInterface $scopeConfig)
-    {
-        $this->scopeConfig = $scopeConfig;
+    public function __construct(
+        private readonly ScopeConfigInterface $scopeConfig
+    ) {
     }
 
     /**

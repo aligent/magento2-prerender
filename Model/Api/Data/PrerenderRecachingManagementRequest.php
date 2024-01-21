@@ -1,7 +1,7 @@
 <?php
 /**
  * Aligent Consulting
- * Copyright (c) 2023 Aligent Consulting. (https://www.aligent.com.au)
+ * Copyright (c) Aligent Consulting (https://www.aligent.com.au)
  */
 
 declare(strict_types=1);
