@@ -9,6 +9,7 @@
         <description translate="true">Recaches product urls when products are updated</description>
         <dependencies>
             <indexer id="cataloginventory_stock" />
+            <indexer id="inventory" />
             <indexer id="catalog_product_price" />
         </dependencies>
     </indexer>
@@ -18,6 +19,7 @@
         <dependencies>
             <indexer id="catalog_category_product" />
             <indexer id="cataloginventory_stock" />
+            <indexer id="inventory" />
             <indexer id="catalog_product_price" />
         </dependencies>
     </indexer>
@@ -27,6 +29,7 @@
         <dependencies>
             <indexer id="catalog_product_category" />
             <indexer id="cataloginventory_stock" />
+            <indexer id="inventory" />
             <indexer id="catalog_product_price" />
         </dependencies>
     </indexer>
