@@ -6,8 +6,9 @@
 
 declare(strict_types=1);
 
-namespace Aligent\Prerender\Model\Api;
+namespace Aligent\Prerender\Test\Unit\Api;
 
+use Aligent\Prerender\Model\Api\PrerenderClient;
 use Aligent\Prerender\Helper\Config;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\HTTP\ClientInterface;
