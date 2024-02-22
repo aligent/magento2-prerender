@@ -12,9 +12,9 @@ use Magento\Store\Model\ScopeInterface;
 
 class Config
 {
-    private const XML_PATH_RECACHE_ENABLED = 'system/prerender/enabled';
-    private const XML_PATH_PRERENDER_TOKEN = 'system/prerender/token';
-    private const XML_PATH_RECACHE_SERVICE_URL = 'system/prerender/service_url';
+    public const XML_PATH_RECACHE_ENABLED = 'system/prerender/enabled';
+    public const XML_PATH_PRERENDER_TOKEN = 'system/prerender/token';
+    public const XML_PATH_RECACHE_SERVICE_URL = 'system/prerender/service_url';
 
     /** @var ScopeConfigInterface  */
     private ScopeConfigInterface $scopeConfig;
