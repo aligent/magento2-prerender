@@ -33,7 +33,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     /** @var PrerenderClientInterface  */
     private PrerenderClientInterface $prerenderClient;
     /** @var DeploymentConfig  */
-    private DeploymentConfig $eploymentConfig;
+    private DeploymentConfig $deploymentConfig;
     /** @var Config  */
     private Config $prerenderConfigHelper;
     /** @var Configurable */
