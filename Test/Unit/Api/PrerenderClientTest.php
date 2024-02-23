@@ -23,7 +23,11 @@ class PrerenderClientTest extends TestCase
      */
     private PrerenderClient $prerenderClient;
 
-    private $prerenderConfigHelperMock;
+
+    /**
+     * @var Config
+     */
+    private Config $prerenderConfigHelperMock;
 
     /**
      * @inheritDoc
