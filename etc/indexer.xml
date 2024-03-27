@@ -7,13 +7,30 @@
     <indexer id="prerender_product" view_id="prerender_product" class="Aligent\Prerender\Model\Indexer\Product\ProductIndexer">
         <title translate="true">Prerender service Product Recaching</title>
         <description translate="true">Recaches product urls when products are updated</description>
+        <dependencies>
+            <indexer id="cataloginventory_stock" />
+            <indexer id="inventory" />
+            <indexer id="catalog_product_price" />
+        </dependencies>
     </indexer>
     <indexer id="prerender_category" view_id="prerender_category" class="Aligent\Prerender\Model\Indexer\Category\CategoryIndexer">
         <title translate="true">Prerender service Category Recaching</title>
         <description translate="true">Recaches category urls when categories are updated</description>
+        <dependencies>
+            <indexer id="catalog_category_product" />
+            <indexer id="cataloginventory_stock" />
+            <indexer id="inventory" />
+            <indexer id="catalog_product_price" />
+        </dependencies>
     </indexer>
     <indexer id="prerender_category_product" view_id="prerender_category_product" class="Aligent\Prerender\Model\Indexer\Category\ProductIndexer">
         <title translate="true">Prerender service Category Product Recaching</title>
         <description translate="true">Recaches category urls when products are updated</description>
+        <dependencies>
+            <indexer id="catalog_product_category" />
+            <indexer id="cataloginventory_stock" />
+            <indexer id="inventory" />
+            <indexer id="catalog_product_price" />
+        </dependencies>
     </indexer>
 </config>

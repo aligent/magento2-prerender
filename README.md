@@ -1,4 +1,4 @@
-# magento2-prerender-io
+# magento2-prerender
 Provides integration between Magento 2 and Prerender service, giving the ability for pages to be automatically recached when required.
 
 ## Overview
