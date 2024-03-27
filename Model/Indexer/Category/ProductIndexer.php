@@ -43,6 +43,9 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
      * @param DeploymentConfig $deploymentConfig
      * @param Config $prerenderConfigHelper
      * @param Configurable $configurable
+     * @param PrerenderRecachingManagementRequest $prerenderRecachingManagementRequest
+     * @param MassSchedule $massSchedule
+     * @param Json $json
      * @param int|null $batchSize
      */
     public function __construct(
