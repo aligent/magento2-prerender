@@ -18,15 +18,6 @@ class PrerenderClient implements PrerenderClientInterface
 
     private const MAX_URLS = 1000;
 
-    /** @var Config  */
-    private Config $prerenderConfigHelper;
-    /** @var ClientInterface  */
-    private ClientInterface $client;
-    /** @var SerializerInterface  */
-    private SerializerInterface $jsonSerializer;
-    /** @var LoggerInterface  */
-    private LoggerInterface $logger;
-
     /**
      *
      * @param Config $prerenderConfigHelper
@@ -35,15 +26,11 @@ class PrerenderClient implements PrerenderClientInterface
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Config $prerenderConfigHelper,
-        ClientInterface $client,
-        SerializerInterface $jsonSerializer,
-        LoggerInterface $logger
+        private readonly Config $prerenderConfigHelper,
+        private readonly ClientInterface $client,
+        private readonly SerializerInterface $jsonSerializer,
+        private readonly LoggerInterface $logger
     ) {
-        $this->prerenderConfigHelper = $prerenderConfigHelper;
-        $this->jsonSerializer = $jsonSerializer;
-        $this->logger = $logger;
-        $this->client = $client;
         $this->client->addHeader('content-type', 'application/json');
     }
 

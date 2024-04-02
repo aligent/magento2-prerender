@@ -7,10 +7,13 @@ declare(strict_types=1);
 
 namespace Aligent\Prerender\Model\Indexer\Product;
 
+use Aligent\Prerender\Api\Data\PrerenderRecachingManagementRequestInterfaceFactory
+    as PrerenderRecachingManagementRequest;
 use Aligent\Prerender\Api\PrerenderClientInterface;
 use Aligent\Prerender\Helper\Config;
 use Aligent\Prerender\Model\Url\GetUrlsForProducts;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\AsynchronousOperations\Model\MassSchedule;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
@@ -19,6 +22,7 @@ use Magento\Framework\Indexer\ActionInterface as IndexerActionInterface;
 use Magento\Framework\Indexer\DimensionalIndexerInterface;
 use Magento\Framework\Indexer\DimensionProviderInterface;
 use Magento\Framework\Mview\ActionInterface as MviewActionInterface;
+use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Store\Model\StoreDimensionProvider;
 
 class ProductIndexer implements IndexerActionInterface, MviewActionInterface, DimensionalIndexerInterface
@@ -26,18 +30,6 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     private const INDEXER_ID = 'prerender_product';
     private const DEPLOYMENT_CONFIG_INDEXER_BATCHES = 'indexer/batch_size/';
 
-    /** @var DimensionProviderInterface  */
-    private DimensionProviderInterface $dimensionProvider;
-    /** @var GetUrlsForProducts  */
-    private GetUrlsForProducts $getUrlsForProducts;
-    /** @var PrerenderClientInterface  */
-    private PrerenderClientInterface $prerenderClient;
-    /** @var DeploymentConfig  */
-    private DeploymentConfig $deploymentConfig;
-    /** @var Config  */
-    private Config $prerenderConfigHelper;
-    /** @var Configurable */
-    private Configurable $configurable;
     /** @var int|null  */
     private ?int $batchSize;
 
@@ -49,24 +41,24 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
      * @param DeploymentConfig $deploymentConfig
      * @param Config $prerenderConfigHelper
      * @param Configurable $configurable
+     * @param PrerenderRecachingManagementRequest $prerenderRecachingManagementRequest
+     * @param MassSchedule $massSchedule
+     * @param Json $json
      * @param int|null $batchSize
      */
     public function __construct(
-        DimensionProviderInterface $dimensionProvider,
-        GetUrlsForProducts $getUrlsForProducts,
-        PrerenderClientInterface $prerenderClient,
-        DeploymentConfig $deploymentConfig,
-        Config $prerenderConfigHelper,
-        Configurable $configurable,
+        private readonly DimensionProviderInterface $dimensionProvider,
+        private readonly GetUrlsForProducts $getUrlsForProducts,
+        private readonly PrerenderClientInterface $prerenderClient,
+        private readonly DeploymentConfig $deploymentConfig,
+        private readonly Config $prerenderConfigHelper,
+        private readonly Configurable $configurable,
+        private readonly PrerenderRecachingManagementRequest $prerenderRecachingManagementRequest,
+        private readonly MassSchedule $massSchedule,
+        private readonly Json $json,
         ?int $batchSize = 1000
     ) {
-        $this->dimensionProvider = $dimensionProvider;
-        $this->getUrlsForProducts = $getUrlsForProducts;
-        $this->prerenderClient = $prerenderClient;
-        $this->deploymentConfig = $deploymentConfig;
         $this->batchSize = $batchSize;
-        $this->prerenderConfigHelper = $prerenderConfigHelper;
-        $this->configurable = $configurable;
     }
 
     /**
@@ -135,7 +127,9 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     public function executeByDimensions(array $dimensions, \Traversable $entityIds): void
     {
         if (count($dimensions) > 1 || !isset($dimensions[StoreDimensionProvider::DIMENSION_NAME])) {
-            throw new \InvalidArgumentException('Indexer "' . self::INDEXER_ID . '" supports only Store dimension');
+            throw new \InvalidArgumentException(
+                'Indexer "' . self::INDEXER_ID . '" supports only Store dimension'
+            );
         }
         $storeId = (int)$dimensions[StoreDimensionProvider::DIMENSION_NAME]->getValue();
 
@@ -147,7 +141,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
 
         $parentIds = $this->configurable->getParentIdsByChild($entityIds);
         $entityIds = array_unique(array_merge($entityIds, $parentIds));
-        
+
         // get urls for the products
         $urls = $this->getUrlsForProducts->execute($entityIds, $storeId);
 
@@ -157,7 +151,11 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
 
         $urlBatches = array_chunk($urls, $this->batchSize);
         foreach ($urlBatches as $batchUrls) {
-            $this->prerenderClient->recacheUrls($batchUrls, $storeId);
+            $request = $this->prerenderRecachingManagementRequest->create();
+            $request->setBatchUrls($this->json->serialize($batchUrls));
+            $request->setStoreId((int) $storeId);
+            $request->setIndexerId(self::INDEXER_ID);
+            $this->massSchedule->publishMass('asynchronous.prerender.recaching', [[$request]]);
         }
     }
 }

@@ -13,21 +13,14 @@ use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCo
 
 class ProductCategories
 {
-    /** @var ProductCollectionFactory */
-    private ProductCollectionFactory $productCollectionFactory;
-    /** @var CategoryCollectionFactory */
-    private CategoryCollectionFactory $categoryCollectionFactory;
-
     /**
      * @param ProductCollectionFactory $productCollectionFactory
      * @param CategoryCollectionFactory $categoryCollectionFactory
      */
     public function __construct(
-        ProductCollectionFactory $productCollectionFactory,
-        CategoryCollectionFactory $categoryCollectionFactory
+        private readonly ProductCollectionFactory $productCollectionFactory,
+        private readonly CategoryCollectionFactory $categoryCollectionFactory
     ) {
-        $this->productCollectionFactory = $productCollectionFactory;
-        $this->categoryCollectionFactory = $categoryCollectionFactory;
     }
 
     /**

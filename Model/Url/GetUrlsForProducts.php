@@ -18,16 +18,6 @@ class GetUrlsForProducts
 {
     private const DELIMETER = "?";
 
-    /** @var CollectionFactory  */
-    private CollectionFactory $productCollectionFactory;
-    /** @var StoreManagerInterface */
-    private StoreManagerInterface $storeManager;
-    /** @var Emulation */
-    private Emulation $emulation;
-
-    /** @var Url */
-    private Url $url;
-
     /**
      *
      * @param CollectionFactory $productCollectionFactory
@@ -35,15 +25,11 @@ class GetUrlsForProducts
      * @param Emulation $emulation
      */
     public function __construct(
-        CollectionFactory $productCollectionFactory,
-        StoreManagerInterface $storeManager,
-        Emulation $emulation,
-        Url $url
+        private readonly CollectionFactory $productCollectionFactory,
+        private readonly StoreManagerInterface $storeManager,
+        private readonly Emulation $emulation,
+        private readonly Url $url
     ) {
-        $this->productCollectionFactory = $productCollectionFactory;
-        $this->storeManager = $storeManager;
-        $this->emulation = $emulation;
-        $this->url = $url;
     }
 
     /**

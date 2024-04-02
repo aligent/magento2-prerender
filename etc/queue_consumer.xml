@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="prerender.recaching.handler"
+              queue="prerender.recaching"
+              connection="amqp"
+              consumerInstance="Magento\AsynchronousOperations\Model\MassConsumer"
+              onlySpawnWhenMessageAvailable="0"
+              maxMessages="5000"
+    />
+</config>
