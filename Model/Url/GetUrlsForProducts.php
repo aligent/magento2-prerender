@@ -81,10 +81,11 @@ class GetUrlsForProducts
                 continue;
             }
             try {
-                $url = $this->url->getUrl($urlPath, ['_scope_to_url' => true]);
+                // Retrieve URL using store configuration
+                $url = $store->getUrl('', ['_direct' => $urlPath]);
 
-                // remove trailing slashes and parameters from the url
-                $urls[] = substr($url, 0, strrpos($url, '/'));
+                // Remove trailing slashes from urls
+                $urls[] = rtrim($url, '/');
             } catch (NoSuchEntityException $e) {
                 continue;
             }
