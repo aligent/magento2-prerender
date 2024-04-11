@@ -9,7 +9,6 @@ namespace Aligent\Prerender\Model\Url;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Url;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
@@ -25,9 +24,6 @@ class GetUrlsForCategories
     /** @var Emulation */
     private Emulation $emulation;
 
-    /** @var Url */
-    private Url $url;
-
     /**
      *
      * @param CollectionFactory $categoryCollectionFactory
@@ -37,13 +33,11 @@ class GetUrlsForCategories
     public function __construct(
         CollectionFactory $categoryCollectionFactory,
         StoreManagerInterface $storeManager,
-        Emulation $emulation,
-        Url $url
+        Emulation $emulation
     ) {
         $this->categoryCollectionFactory = $categoryCollectionFactory;
         $this->storeManager = $storeManager;
         $this->emulation = $emulation;
-        $this->url = $url;
     }
 
     /**
