@@ -15,11 +15,12 @@ use Magento\Framework\Mview\View\CollectionInterface;
 use Magento\Framework\Mview\ViewInterface;
 use Magento\Framework\Mview\Config;
 use Magento\Framework\Mview\View\Changelog;
+use Magento\Framework\Mview\View\Subscription;
 
 /**
  * Subscription model class for "catalog_product_link" table
  */
-class CatalogProductLinkSubscription extends \Magento\Framework\Mview\View\Subscription
+class CatalogProductLinkSubscription extends Subscription
 {
     private const CATALOG_PRODUCT_LINK_PRODUCT_ID = 'product_id';
 

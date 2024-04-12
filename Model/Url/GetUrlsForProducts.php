@@ -4,12 +4,12 @@
  */
 
 declare(strict_types=1);
+
 namespace Aligent\Prerender\Model\Url;
 
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Url;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
@@ -25,9 +25,6 @@ class GetUrlsForProducts
     /** @var Emulation */
     private Emulation $emulation;
 
-    /** @var Url */
-    private Url $url;
-
     /**
      *
      * @param CollectionFactory $productCollectionFactory
@@ -37,13 +34,11 @@ class GetUrlsForProducts
     public function __construct(
         CollectionFactory $productCollectionFactory,
         StoreManagerInterface $storeManager,
-        Emulation $emulation,
-        Url $url
+        Emulation $emulation
     ) {
         $this->productCollectionFactory = $productCollectionFactory;
         $this->storeManager = $storeManager;
         $this->emulation = $emulation;
-        $this->url = $url;
     }
 
     /**
@@ -81,10 +76,11 @@ class GetUrlsForProducts
                 continue;
             }
             try {
-                $url = $this->url->getUrl($urlPath, ['_scope_to_url' => true]);
+                // Retrieve URL using store configuration
+                $url = $store->getUrl('', ['_direct' => $urlPath]);
 
-                // remove trailing slashes and parameters from the url
-                $urls[] = substr($url, 0, strrpos($url, '/'));
+                // Remove trailing slashes from urls
+                $urls[] = rtrim($url, '/');
             } catch (NoSuchEntityException $e) {
                 continue;
             }
