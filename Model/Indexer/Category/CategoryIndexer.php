@@ -32,7 +32,7 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
     /** @var PrerenderClientInterface  */
     private PrerenderClientInterface $prerenderClient;
     /** @var DeploymentConfig  */
-    private DeploymentConfig $eploymentConfig;
+    private DeploymentConfig $deploymentConfig;
     /** @var Config  */
     private Config $prerenderConfigHelper;
     /** @var int|null  */
