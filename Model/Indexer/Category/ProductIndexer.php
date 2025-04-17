@@ -133,7 +133,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     /**
      * Execute indexing per dimension (store)
      *
-     * @param arry $dimensions
+     * @param array $dimensions
      * @param \Traversable $entityIds
      * @throws FileSystemException
      * @throws RuntimeException
@@ -145,7 +145,8 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         }
         $storeId = (int)$dimensions[StoreDimensionProvider::DIMENSION_NAME]->getValue();
 
-        if (!$this->prerenderConfigHelper->isRecacheEnabled($storeId)) {
+        if (!$this->prerenderConfigHelper->isRecacheEnabled($storeId)
+            || !$this->prerenderConfigHelper->isProductCategoryRecacheEnabled($storeId)) {
             return;
         }
 
