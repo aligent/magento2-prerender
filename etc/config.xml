@@ -6,6 +6,7 @@
             <prerender>
                 <enabled>0</enabled>
                 <service_url><![CDATA[https://api.prerender.io/recache]]></service_url>
+                <use_product_canonical_url>0</use_product_canonical_url>
             </prerender>
         </system>
     </default>
