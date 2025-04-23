@@ -20,17 +20,41 @@ class GetUrlsForProducts
     private const DELIMETER = "?";
 
     /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var Emulation
+     */
+    private $emulation;
+
+    /**
+     * @var UrlFinderInterface
+     */
+    private $urlFinder;
+
+    /**
+     * @var Config
+     */
+    private $prerenderConfigHelper;
+
+    /**
      * @param StoreManagerInterface $storeManager
      * @param Emulation $emulation
      * @param UrlFinderInterface $urlFinder
      * @param Config $prerenderConfigHelper
      */
     public function __construct(
-        private readonly StoreManagerInterface $storeManager,
-        private readonly Emulation $emulation,
-        private readonly UrlFinderInterface $urlFinder,
-        private readonly Config $prerenderConfigHelper,
+        StoreManagerInterface $storeManager,
+        Emulation $emulation,
+        UrlFinderInterface $urlFinder,
+        Config $prerenderConfigHelper
     ) {
+        $this->storeManager = $storeManager;
+        $this->emulation = $emulation;
+        $this->urlFinder = $urlFinder;
+        $this->prerenderConfigHelper = $prerenderConfigHelper;
     }
 
     /**
