@@ -7,38 +7,54 @@ declare(strict_types=1);
 
 namespace Aligent\Prerender\Model\Url;
 
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\UrlRewrite\Controller\Adminhtml\Url\Rewrite;
+use Magento\UrlRewrite\Model\UrlFinderInterface;
+use Magento\UrlRewrite\Service\V1\Data\UrlRewrite;
 
 class GetUrlsForProducts
 {
     private const DELIMETER = "?";
 
-    /** @var CollectionFactory  */
-    private CollectionFactory $productCollectionFactory;
-    /** @var StoreManagerInterface */
-    private StoreManagerInterface $storeManager;
-    /** @var Emulation */
-    private Emulation $emulation;
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
 
     /**
-     *
-     * @param CollectionFactory $productCollectionFactory
+     * @var Emulation
+     */
+    private $emulation;
+
+    /**
+     * @var UrlFinderInterface
+     */
+    private $urlFinder;
+
+    /**
+     * @var Config
+     */
+    private $prerenderConfigHelper;
+
+    /**
      * @param StoreManagerInterface $storeManager
      * @param Emulation $emulation
+     * @param UrlFinderInterface $urlFinder
+     * @param Config $prerenderConfigHelper
      */
     public function __construct(
-        CollectionFactory $productCollectionFactory,
         StoreManagerInterface $storeManager,
-        Emulation $emulation
+        Emulation $emulation,
+        UrlFinderInterface $urlFinder,
+        Config $prerenderConfigHelper
     ) {
-        $this->productCollectionFactory = $productCollectionFactory;
         $this->storeManager = $storeManager;
         $this->emulation = $emulation;
+        $this->urlFinder = $urlFinder;
+        $this->prerenderConfigHelper = $prerenderConfigHelper;
     }
 
     /**
@@ -50,16 +66,6 @@ class GetUrlsForProducts
      */
     public function execute(array $productIds, int $storeId): array
     {
-        $productCollection = $this->productCollectionFactory->create();
-        // do not ignore out of stock products
-        $productCollection->setFlag('has_stock_status_filter', true);
-        // if array of product ids is empty, just load all products
-        if (!empty($productIds)) {
-            $productCollection->addIdFilter($productIds);
-        }
-        $productCollection->setStoreId($storeId);
-        $productCollection->addUrlRewrite();
-
         try {
             /** @var Store $store */
             $store = $this->storeManager->getStore($storeId);
@@ -67,17 +73,30 @@ class GetUrlsForProducts
             return [];
         }
 
+        $useProductCanonical = $this->prerenderConfigHelper->isUseProductCanonicalUrlEnabled($storeId);
+
+        $findByData = [
+            UrlRewrite::ENTITY_TYPE => Rewrite::ENTITY_TYPE_PRODUCT,
+            UrlRewrite::STORE_ID => $storeId,
+            UrlRewrite::ENTITY_ID =>  $productIds
+        ];
+
+        $urlRewrites = $this->urlFinder->findAllByData($findByData);
         $this->emulation->startEnvironmentEmulation($storeId);
         $urls = [];
         /** @var Product $product */
-        foreach ($productCollection as $product) {
-            $urlPath = $product->getData('request_path');
-            if (empty($urlPath)) {
+        foreach ($urlRewrites as $urlRewrite) {
+            if (empty($urlRewrite->getRequestPath())) {
                 continue;
             }
+            // Ignore the product URL with category path.
+            if ($useProductCanonical && $urlRewrite->getMetadata()) {
+                continue;
+            }
+
             try {
                 // Retrieve URL using store configuration
-                $url = $store->getUrl('', ['_direct' => $urlPath]);
+                $url = $store->getUrl('', ['_direct' => $urlRewrite->getRequestPath()]);
 
                 // Remove trailing slashes from urls
                 $urls[] = rtrim($url, '/');
