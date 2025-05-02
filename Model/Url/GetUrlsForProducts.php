@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Aligent\Prerender\Model\Url;
 
+use Aligent\Prerender\Helper\Config;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
