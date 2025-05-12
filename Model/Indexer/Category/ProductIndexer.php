@@ -9,6 +9,7 @@ namespace Aligent\Prerender\Model\Indexer\Category;
 
 use Aligent\Prerender\Api\PrerenderClientInterface;
 use Aligent\Prerender\Helper\Config;
+use Aligent\Prerender\Model\Filter\DisabledEntityFilter;
 use Aligent\Prerender\Model\Indexer\DataProvider\ProductCategories;
 use Aligent\Prerender\Model\Url\GetUrlsForCategories;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -41,11 +42,12 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     private Config $prerenderConfigHelper;
     /** @var Configurable */
     private Configurable $configurable;
+    /** @var DisabledEntityFilter */
+    private DisabledEntityFilter $disabledEntityFilter;
     /** @var int|null  */
     private ?int $batchSize;
 
     /**
-     *
      * @param DimensionProviderInterface $dimensionProvider
      * @param ProductCategories $productCategoriesDataProvider
      * @param GetUrlsForCategories $getUrlsForCategories
@@ -53,6 +55,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
      * @param DeploymentConfig $deploymentConfig
      * @param Config $prerenderConfigHelper
      * @param Configurable $configurable
+     * @param DisabledEntityFilter $disabledEntityFilter
      * @param int|null $batchSize
      */
     public function __construct(
@@ -63,6 +66,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         DeploymentConfig $deploymentConfig,
         Config $prerenderConfigHelper,
         Configurable $configurable,
+        DisabledEntityFilter $disabledEntityFilter,
         ?int $batchSize = 1000
     ) {
         $this->dimensionProvider = $dimensionProvider;
@@ -73,6 +77,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         $this->batchSize = $batchSize;
         $this->prerenderConfigHelper = $prerenderConfigHelper;
         $this->configurable = $configurable;
+        $this->disabledEntityFilter = $disabledEntityFilter;
     }
 
     /**
@@ -155,12 +160,20 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         // Include configurable product id(s) if the edited product is simple
         $parentIds = $this->configurable->getParentIdsByChild($entityIds);
         $entityIds = array_unique(array_merge($entityIds, $parentIds));
-        
+        $enabledEntityIds = $this->disabledEntityFilter->filterDisabledProducts($entityIds);
+        if (empty($enabledEntityIds)) {
+            return;
+        }
+
         // get list of category ids for the products
-        $categoryIds = $this->productCategoriesDataProvider->getCategoryIdsForProducts($entityIds, $storeId);
+        $categoryIds = $this->productCategoriesDataProvider->getCategoryIdsForProducts($enabledEntityIds, $storeId);
+        $enabledCategoryIds = $this->disabledEntityFilter->filterDisabledCategories($categoryIds);
+        if (empty($enabledCategoryIds)) {
+            return;
+        }
 
         // get urls for the products
-        $urls = $this->getUrlsForCategories->execute($categoryIds, $storeId);
+        $urls = $this->getUrlsForCategories->execute($enabledCategoryIds, $storeId);
 
         $this->batchSize = $this->deploymentConfig->get(
             self::DEPLOYMENT_CONFIG_INDEXER_BATCHES . self::INDEXER_ID . '/partial_reindex'

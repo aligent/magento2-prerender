@@ -9,6 +9,7 @@ namespace Aligent\Prerender\Model\Indexer\Category;
 
 use Aligent\Prerender\Api\PrerenderClientInterface;
 use Aligent\Prerender\Helper\Config;
+use Aligent\Prerender\Model\Filter\DisabledEntityFilter;
 use Aligent\Prerender\Model\Url\GetUrlsForCategories;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\Exception\FileSystemException;
@@ -35,16 +36,18 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
     private DeploymentConfig $deploymentConfig;
     /** @var Config  */
     private Config $prerenderConfigHelper;
+    /** @var DisabledEntityFilter */
+    private DisabledEntityFilter $disabledEntityFilter;
     /** @var int|null  */
     private ?int $batchSize;
 
     /**
-     *
      * @param DimensionProviderInterface $dimensionProvider
      * @param GetUrlsForCategories $getUrlsForCategories
      * @param PrerenderClientInterface $prerenderClient
      * @param DeploymentConfig $deploymentConfig
      * @param Config $prerenderConfigHelper
+     * @param DisabledEntityFilter $disabledEntityFilter
      * @param int|null $batchSize
      */
     public function __construct(
@@ -53,6 +56,7 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
         PrerenderClientInterface $prerenderClient,
         DeploymentConfig $deploymentConfig,
         Config $prerenderConfigHelper,
+        DisabledEntityFilter $disabledEntityFilter,
         ?int $batchSize = 1000
     ) {
         $this->dimensionProvider = $dimensionProvider;
@@ -61,6 +65,7 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
         $this->deploymentConfig = $deploymentConfig;
         $this->batchSize = $batchSize;
         $this->prerenderConfigHelper = $prerenderConfigHelper;
+        $this->disabledEntityFilter = $disabledEntityFilter;
     }
 
     /**
@@ -139,8 +144,13 @@ class CategoryIndexer implements IndexerActionInterface, MviewActionInterface, D
         }
 
         $entityIds = iterator_to_array($entityIds);
+        $enabledCategoryIds = $this->disabledEntityFilter->filterDisabledCategories($entityIds);
+        if (empty($enabledCategoryIds)) {
+            return;
+        }
+
         // get urls for the products
-        $urls = $this->getUrlsForCategories->execute($entityIds, $storeId);
+        $urls = $this->getUrlsForCategories->execute($enabledCategoryIds, $storeId);
 
         $this->batchSize = $this->deploymentConfig->get(
             self::DEPLOYMENT_CONFIG_INDEXER_BATCHES . self::INDEXER_ID . '/partial_reindex'
