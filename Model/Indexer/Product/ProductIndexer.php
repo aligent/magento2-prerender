@@ -9,6 +9,7 @@ namespace Aligent\Prerender\Model\Indexer\Product;
 
 use Aligent\Prerender\Api\PrerenderClientInterface;
 use Aligent\Prerender\Helper\Config;
+use Aligent\Prerender\Model\Filter\DisabledEntityFilter;
 use Aligent\Prerender\Model\Url\GetUrlsForProducts;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\App\DeploymentConfig;
@@ -38,17 +39,19 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
     private Config $prerenderConfigHelper;
     /** @var Configurable */
     private Configurable $configurable;
+    /** @var DisabledEntityFilter */
+    private DisabledEntityFilter $disabledEntityFilter;
     /** @var int|null  */
     private ?int $batchSize;
 
     /**
-     *
      * @param DimensionProviderInterface $dimensionProvider
      * @param GetUrlsForProducts $getUrlsForProducts
      * @param PrerenderClientInterface $prerenderClient
      * @param DeploymentConfig $deploymentConfig
      * @param Config $prerenderConfigHelper
      * @param Configurable $configurable
+     * @param DisabledEntityFilter $disabledEntityFilter
      * @param int|null $batchSize
      */
     public function __construct(
@@ -58,6 +61,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         DeploymentConfig $deploymentConfig,
         Config $prerenderConfigHelper,
         Configurable $configurable,
+        DisabledEntityFilter $disabledEntityFilter,
         ?int $batchSize = 1000
     ) {
         $this->dimensionProvider = $dimensionProvider;
@@ -67,6 +71,7 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         $this->batchSize = $batchSize;
         $this->prerenderConfigHelper = $prerenderConfigHelper;
         $this->configurable = $configurable;
+        $this->disabledEntityFilter = $disabledEntityFilter;
     }
 
     /**
@@ -145,12 +150,15 @@ class ProductIndexer implements IndexerActionInterface, MviewActionInterface, Di
         }
 
         $entityIds = iterator_to_array($entityIds);
-
         $parentIds = $this->configurable->getParentIdsByChild($entityIds);
         $entityIds = array_unique(array_merge($entityIds, $parentIds));
-        
+        $enabledEntityIds = $this->disabledEntityFilter->filterDisabledProducts($entityIds);
+        if (empty($enabledEntityIds)) {
+            return;
+        }
+
         // get urls for the products
-        $urls = $this->getUrlsForProducts->execute($entityIds, $storeId);
+        $urls = $this->getUrlsForProducts->execute($enabledEntityIds, $storeId);
 
         $this->batchSize = $this->deploymentConfig->get(
             self::DEPLOYMENT_CONFIG_INDEXER_BATCHES . self::INDEXER_ID . '/partial_reindex'
