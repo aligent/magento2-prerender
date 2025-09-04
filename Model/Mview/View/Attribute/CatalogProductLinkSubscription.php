@@ -69,7 +69,7 @@ class CatalogProductLinkSubscription extends Subscription
         $entityInterface = null,
         $ignoredUpdateColumns = [],
         $ignoredUpdateColumnsBySubscription = [],
-        Config $mviewConfig = null
+        ?Config $mviewConfig = null
     ) {
         parent::__construct(
             $resource,
