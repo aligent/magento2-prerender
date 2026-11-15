@@ -79,6 +79,7 @@ class GetUrlsForProducts
         $findByData = [
             UrlRewrite::ENTITY_TYPE => Rewrite::ENTITY_TYPE_PRODUCT,
             UrlRewrite::STORE_ID => $storeId,
+            UrlRewrite::REDIRECT_TYPE => 0,
             UrlRewrite::ENTITY_ID =>  $productIds
         ];
 
